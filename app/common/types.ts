@@ -40,7 +40,12 @@ export type ScreenShareSource = {
   id: string;
   name: string;
   kind: "screen" | "window";
-  thumbnailDataUrl: string;
+  /**
+   Absent when the picker first opens, and filled in by
+   `display-media-thumbnails` once they have been captured. Enumerating the
+   sources is quick; capturing a picture of each one can take seconds.
+   */
+  thumbnailDataUrl?: string | undefined;
   appIconDataUrl?: string | undefined;
   /**
    The application this window belongs to, where its sound can be sent on its

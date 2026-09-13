@@ -600,6 +600,13 @@ webview.focus {
   border-radius: 2px;
 }
 
+/* A tile whose picture has not arrived yet, or never will. Without this
+   Chromium outlines an image with no source as though it failed to load, and a
+   picture still on its way is not a broken one. */
+.screen-share-thumbnail:not([src]) {
+  content: linear-gradient(transparent, transparent);
+}
+
 .screen-share-name {
   font-size: 12px;
   overflow: hidden;

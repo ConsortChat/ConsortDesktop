@@ -252,8 +252,12 @@ export type ScreenShareChoice = {
 // Dismissing resolves to null rather than never resolving. The page is waiting
 // on a promise that only this answer completes, and a cancelled share that
 // leaves the call waiting for ever is worse than a refused one.
+//
+// `requestId` names this picker, so that the thumbnails sent after it opens
+// reach this one and not a later one — see showScreenShareThumbnails.
 export async function chooseScreenShareSource(
   sources: ScreenShareSource[],
+  requestId: number,
 ): Promise<ScreenShareChoice> {
   const $root = document.querySelector("#screen-share-picker");
   if ($root === null) {
@@ -269,7 +273,12 @@ export async function chooseScreenShareSource(
       class="screen-share-tile"
       data-source-id="${source.id}"
     >
-      <img class="screen-share-thumbnail" src="${source.thumbnailDataUrl}" />
+      ${source.thumbnailDataUrl === undefined
+        ? html`<img class="screen-share-thumbnail" />`
+        : html`<img
+            class="screen-share-thumbnail"
+            src="${source.thumbnailDataUrl}"
+          />`}
       <span class="screen-share-name" title="${source.name}"
         >${source.name}</span
       >
@@ -381,7 +390,7 @@ export async function chooseScreenShareSource(
   })();
 
   const $overlay = generateNodeFromHtml(html`
-    <div class="screen-share-overlay">
+    <div class="screen-share-overlay" data-request-id="${String(requestId)}">
       <div class="screen-share-dialog">
         <div class="screen-share-header">${t.__("Choose what to share")}</div>
         <div class="screen-share-body">
@@ -398,6 +407,16 @@ export async function chooseScreenShareSource(
     </div>
   `);
   $root.append($overlay);
+
+  // Pictures that were ready before the picker was. It asks the main process a
+  // question before drawing, and on a machine whose windows all answer promptly
+  // the thumbnails can win that race. Anything else held is for a picker that
+  // never opened, and this is the moment it stops being worth keeping.
+  const early = earlyThumbnails.get(requestId);
+  earlyThumbnails.clear();
+  if (early !== undefined) {
+    fillThumbnails($overlay, early);
+  }
 
   // Neither platform starts on an answer any more. Linux used to start on the
   // application it would have chosen by itself, which reads as helpful and is
@@ -476,4 +495,51 @@ export async function chooseScreenShareSource(
     });
     document.addEventListener("keydown", onKeydown);
   });
+}
+
+// Thumbnails that arrived for a picker not yet on screen, by request id. At
+// most one entry is worth anything, and the next picker to open clears the rest.
+const earlyThumbnails = new Map<number, Record<string, string>>();
+
+function fillThumbnails(
+  $overlay: Element,
+  thumbnails: Record<string, string>,
+): void {
+  for (const $tile of $overlay.querySelectorAll<HTMLElement>(
+    ".screen-share-tile",
+  )) {
+    const {sourceId} = $tile.dataset;
+    const $thumbnail = $tile.querySelector<HTMLImageElement>(
+      ".screen-share-thumbnail",
+    );
+    if (
+      sourceId !== undefined &&
+      $thumbnail !== null &&
+      Object.hasOwn(thumbnails, sourceId)
+    ) {
+      $thumbnail.src = thumbnails[sourceId]!;
+    }
+  }
+}
+
+/**
+ Draw the pictures into a picker that opened without them.
+
+ The picker opens on the list of sources alone, because capturing a picture of
+ every window is what used to hold it back — for five seconds, with one window
+ that never produced one. These follow once they exist.
+ */
+export function showScreenShareThumbnails(
+  requestId: number,
+  thumbnails: Record<string, string>,
+): void {
+  const $overlay = document.querySelector(
+    `.screen-share-overlay[data-request-id="${CSS.escape(String(requestId))}"]`,
+  );
+  if ($overlay === null) {
+    earlyThumbnails.set(requestId, thumbnails);
+    return;
+  }
+
+  fillThumbnails($overlay, thumbnails);
 }

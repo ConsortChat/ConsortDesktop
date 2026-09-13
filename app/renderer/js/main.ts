@@ -37,6 +37,7 @@ import {
   dismissAudioBanners,
   offerAudioShare,
   showAudioBanner,
+  showScreenShareThumbnails,
 } from "./components/screen-share-picker.ts";
 import ServerTab from "./components/server-tab.ts";
 import WebView from "./components/webview.ts";
@@ -1138,7 +1139,10 @@ export class ServerManagerView {
         displayMediaCallbackId: number,
       ) => {
         (async () => {
-          const {sourceId, audioKey} = await chooseScreenShareSource(sources);
+          const {sourceId, audioKey} = await chooseScreenShareSource(
+            sources,
+            displayMediaCallbackId,
+          );
           ipcRenderer.send(
             "display-media-callback",
             displayMediaCallbackId,
@@ -1146,6 +1150,17 @@ export class ServerManagerView {
             audioKey,
           );
         })();
+      },
+    );
+
+    ipcRenderer.on(
+      "display-media-thumbnails",
+      (
+        event,
+        {thumbnails}: {thumbnails: Record<string, string>},
+        displayMediaCallbackId: number,
+      ) => {
+        showScreenShareThumbnails(displayMediaCallbackId, thumbnails);
       },
     );
 

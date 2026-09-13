@@ -3,6 +3,17 @@
 All notable changes to the desktop app are documented in this file. Entries
 below the first are inherited from Zulip Desktop, which this is a fork of.
 
+### Unreleased
+
+**Fixes**:
+
+- The screen share picker opens straight away on Windows, where it could take
+  five seconds to appear. Electron will not list the windows on offer until it
+  has a picture of every one of them, and a window that never gives one — a
+  password manager's, typically — is waited out on a timer. The picker now
+  opens on the list alone and draws the pictures in as they arrive, so a window
+  like that costs a blank tile rather than holding up every share.
+
 ### Consort v5.12.4-17 --2026-08-16
 
 **Fixes**:

@@ -145,6 +145,14 @@ export type RendererMessage = {
     options: {sources: ScreenShareSource[]},
     rendererCallbackId: number,
   ) => void;
+  // The pictures for a picker that is already open, by source id, sent after
+  // the request because capturing them is what made the picker slow to appear.
+  // Only while that request is still waiting; a picker that has been answered
+  // has nothing to draw them in. Sources missing from the map stay blank.
+  "display-media-thumbnails": (
+    options: {thumbnails: Record<string, string>},
+    rendererCallbackId: number,
+  ) => void;
   "permission-request": (
     options: {
       webContentsId: number | null;

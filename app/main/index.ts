@@ -678,16 +678,20 @@ function createMainWindow(): BrowserWindow {
         (process.env.XDG_SESSION_TYPE === "wayland" ||
           Boolean(process.env.WAYLAND_DISPLAY));
 
+      // Without thumbnails, always, and the picker opens on this list. They are
+      // fetched afterwards and drawn in as they arrive — see below.
+      //
+      // Asking for them here held the picker back five seconds on a machine with
+      // KeePassXC open. Electron answers only once every window has a thumbnail,
+      // and a window that never produces one is waited out on a timer: about
+      // 5.4s whatever the thumbnail size and however many windows there are,
+      // against 130ms for this call without them.
       let sources;
       try {
         sources = await desktopCapturer.getSources({
           types: ["screen", "window"],
-          // Thumbnails and icons exist to be drawn in our picker. Under the
-          // portal there is no picker to draw them in, and capturing them is
-          // not free.
-          thumbnailSize: portalChooses
-            ? {width: 0, height: 0}
-            : {width: 320, height: 200},
+          thumbnailSize: {width: 0, height: 0},
+          // Under the portal there is no picker to draw an icon in.
           fetchWindowIcons: !portalChooses,
         });
       } catch (error: unknown) {
@@ -763,13 +767,51 @@ function createMainWindow(): BrowserWindow {
             kind: source.id.startsWith("screen:")
               ? ("screen" as const)
               : ("window" as const),
-            thumbnailDataUrl: source.thumbnail.toDataURL(),
             appIconDataUrl: source.appIcon?.toDataURL(),
             // Resolved here because it takes a window handle and a process, and
             // a renderer should hold neither. Undefined for a screen, which
             // belongs to no application, and everywhere but Windows.
             application: WindowsAppAudio.appForSource(source.id),
           })),
+        },
+        displayMediaCallbackId,
+      );
+
+      // The pictures, now that the picker is on screen to put them in. This is
+      // the slow call, and nothing waits on it: a choice made before it
+      // returns is answered from the list above, which is the list the picker
+      // was drawn from. A window opened in the meantime has no tile to be
+      // chosen from, so it is not missed.
+      let withThumbnails;
+      try {
+        withThumbnails = await desktopCapturer.getSources({
+          types: ["screen", "window"],
+          thumbnailSize: {width: 320, height: 200},
+          fetchWindowIcons: false,
+        });
+      } catch (error: unknown) {
+        // Tiles without pictures are still a picker that works.
+        console.error("could not capture screen sharing thumbnails", error);
+        return;
+      }
+
+      // Answered already, and the picker has gone with the answer.
+      if (!displayMediaCallbacks.has(displayMediaCallbackId)) {
+        return;
+      }
+
+      send(
+        page,
+        "display-media-thumbnails",
+        {
+          // Empty ones left out: the window that never produced a picture is
+          // what made this slow, and a blank tile says so better than a
+          // zero-sized image does.
+          thumbnails: Object.fromEntries(
+            withThumbnails
+              .filter((source) => !source.thumbnail.isEmpty())
+              .map((source) => [source.id, source.thumbnail.toDataURL()]),
+          ),
         },
         displayMediaCallbackId,
       );
