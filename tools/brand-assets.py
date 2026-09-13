@@ -23,6 +23,7 @@ import pathlib
 import shutil
 import subprocess
 import sys
+import time
 
 from PIL import Image
 
@@ -234,6 +235,23 @@ def find_browser():
 RASTER = 1024
 
 
+def wait_for_screenshot(png, timeout=60):
+    """Wait until the browser has finished writing `png`.
+
+    The browser exiting is not the signal: msedge.exe can return straight away
+    and write the screenshot a moment later. So this waits for the file to exist
+    and for its size to hold still across two looks."""
+    deadline = time.monotonic() + timeout
+    last = -1
+    while time.monotonic() < deadline:
+        size = png.stat().st_size if png.exists() else -1
+        if size > 0 and size == last:
+            return
+        last = size
+        time.sleep(0.5)
+    raise SystemExit("Chromium produced no screenshot")
+
+
 def render(svg_text, w=RASTER, h=RASTER):
     """SVG -> a Pillow RGBA image at w x h, transparent background."""
     TMP.mkdir(parents=True, exist_ok=True)
@@ -258,8 +276,7 @@ def render(svg_text, w=RASTER, h=RASTER):
         ],
         check=True, capture_output=True, timeout=120,
     )
-    if not png.exists():
-        raise SystemExit("Chromium produced no screenshot")
+    wait_for_screenshot(png)
     img = Image.open(png).convert("RGBA")
     shutil.rmtree(profile, ignore_errors=True)
     return img
