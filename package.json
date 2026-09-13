@@ -141,6 +141,7 @@
         }
       ]
     },
+    "appxManifestCreated": "./tools/appx-manifest.ts",
     "msi": {
       "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
