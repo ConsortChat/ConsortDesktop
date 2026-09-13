@@ -3,6 +3,17 @@
 All notable changes to the desktop app are documented in this file. Entries
 below the first are inherited from Zulip Desktop, which this is a fork of.
 
+### Unreleased
+
+**Fixes**:
+
+- Releases are published from
+  [ConsortChat/ConsortDesktop](https://github.com/ConsortChat/ConsortDesktop/releases),
+  and the app's links to its releases page and issue tracker now go there. The
+  release build still uploaded to the old Dyslectric/Consort-Desktop repository,
+  so run from its new home it built everything and then failed to publish it.
+  Releases up to 5.12.4-18 stay where they were.
+
 ### Consort v5.12.4-18 --2026-09-13
 
 **Fixes**:
