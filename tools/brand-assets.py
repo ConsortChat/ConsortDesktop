@@ -302,6 +302,28 @@ def write_ico(img, rel, sizes=ICO_SIZES):
     print(f"  {rel}  {sorted(s[0] for s in sizes)}")
 
 
+# The Microsoft Store package's images, in build/appx/ where electron-builder
+# looks for them. Each is written at several scales and makepri chooses between
+# them at install; the manifest names only the unqualified file.
+#
+# Tiles keep a margin, because the Start menu draws them on a plate. The app
+# list and taskbar icon -- Square44x44Logo at a target size -- fills its canvas,
+# as build/icon.ico does, and comes again "unplated" so the taskbar shows the
+# disc itself rather than the disc on a square of accent colour.
+APPX_SCALES = [100, 200, 400]
+APPX_TARGET_SIZES = [16, 24, 32, 48, 256]
+
+
+def write_tile(img, rel, w, h, mark):
+    """The mark centred on a transparent w x h canvas, `mark` pixels across."""
+    p = ROOT / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    canvas.alpha_composite(down(img, mark), ((w - mark) // 2, (h - mark) // 2))
+    canvas.save(p, optimize=True)
+    print(f"  {rel}  {w}x{h}")
+
+
 def write_text(text, rel):
     (ROOT / rel).write_text(text, encoding="utf-8", newline="\n")
     print(f"  {rel}")
@@ -327,6 +349,25 @@ def main():
     write_png(circle, "app/renderer/img/ic_server_tab_default.png", 48)
     write_png(circle, "public/resources/Icon.png", 48)
     write_png(circle, "public/resources/tray/traylinux.png", 48)
+
+    print("Microsoft Store package:")
+    for scale in APPX_SCALES:
+        def px(n):
+            return round(n * scale / 100)
+
+        write_tile(circle, f"build/appx/StoreLogo.scale-{scale}.png",
+                   px(50), px(50), px(50))
+        write_tile(circle, f"build/appx/Square44x44Logo.scale-{scale}.png",
+                   px(44), px(44), px(44))
+        write_tile(circle, f"build/appx/Square150x150Logo.scale-{scale}.png",
+                   px(150), px(150), px(100))
+        write_tile(circle, f"build/appx/Wide310x150Logo.scale-{scale}.png",
+                   px(310), px(150), px(100))
+    for size in APPX_TARGET_SIZES:
+        for form in ["", "_altform-unplated"]:
+            write_tile(circle,
+                       f"build/appx/Square44x44Logo.targetsize-{size}{form}.png",
+                       size, size, size)
 
     print("macOS tray templates (monochrome, macOS tints them):")
     for size, suffix in [(16, ""), (32, "@2x"), (48, "@3x"), (64, "@4x")]:

@@ -35,6 +35,7 @@
     "pack": "node --run build:native && install-electron && electron-vite build && electron-builder --dir",
     "dist": "node --run build:native && install-electron && electron-vite build && electron-builder",
     "mas": "node --run build:native && install-electron && electron-vite build && electron-builder --mac mas",
+    "store": "node --run build:native && install-electron && electron-vite build && electron-builder --win appx --publish never",
     "build:native": "node tools/build-native.js"
   },
   "build": {
@@ -146,6 +147,14 @@
       ]
     },
     "appx": {
+      "identityName": "ConsortChat.Consort",
+      "publisher": "CN=DD34A23C-92BB-46F6-9589-5EF75321EDBC",
+      "publisherDisplayName": "ConsortChat",
+      "applicationId": "Consort",
+      "backgroundColor": "transparent",
+      "minVersion": "10.0.17763.0",
+      "maxVersionTested": "10.0.26100.0",
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
       "customExtensionsPath": "packaging/appx-extensions.xml"
     },
     "appxManifestCreated": "./tools/appx-manifest.ts",
