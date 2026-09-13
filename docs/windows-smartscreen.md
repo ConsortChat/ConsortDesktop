@@ -36,7 +36,7 @@ minute.
 of this repository:
 
 ```text
-https://github.com/Dyslectric/Consort-Desktop/releases
+https://github.com/ConsortChat/ConsortDesktop/releases
 ```
 
 Download the `.exe` from a release's own assets list, not from a mirror, a

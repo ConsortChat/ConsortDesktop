@@ -15,7 +15,7 @@ then finding out what a call in a desktop app can do that a call in a browser ta
 
 ## Installing
 
-Builds are on the [releases page](https://github.com/Dyslectric/Consort-Desktop/releases).
+Builds are on the [releases page](https://github.com/ConsortChat/ConsortDesktop/releases).
 
 **Windows** — download `Consort-Setup-<version>-x64.exe` and run it. It installs for your user
 account and does not ask for administrator rights. Windows will show **"Windows protected your PC"**

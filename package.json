@@ -12,10 +12,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Dyslectric/Consort-Desktop.git"
+    "url": "https://github.com/ConsortChat/ConsortDesktop.git"
   },
   "bugs": {
-    "url": "https://github.com/Dyslectric/Consort-Desktop/issues"
+    "url": "https://github.com/ConsortChat/ConsortDesktop/issues"
   },
   "type": "module",
   "engines": {
@@ -42,8 +42,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "Dyslectric",
-        "repo": "Consort-Desktop"
+        "owner": "ConsortChat",
+        "repo": "ConsortDesktop"
       }
     ],
     "asar": true,

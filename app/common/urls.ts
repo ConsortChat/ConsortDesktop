@@ -2,7 +2,7 @@
 // the issue tracker, the licence, the About dialog -- should come from here, so
 // that a move costs one edit rather than a search.
 
-export const repoUrl = "https://github.com/Dyslectric/Consort-Desktop";
+export const repoUrl = "https://github.com/ConsortChat/ConsortDesktop";
 export const releasesUrl = `${repoUrl}/releases`;
 export const issuesUrl = `${repoUrl}/issues`;
 
