@@ -38,7 +38,7 @@ import * as MicGate from "./mic-gate.ts";
 import * as PushToTalk from "./push-to-talk.ts";
 import {_getServerSettings, _isOnline, _saveServerIcon} from "./request.ts";
 import {sentryInit} from "./sentry.ts";
-import {setAutoLaunch} from "./startup.ts";
+import {setAutoLaunch, syncStartupTask} from "./startup.ts";
 import {ipcMain, send} from "./typed-ipc-main.ts";
 import * as WindowsAppAudio from "./windows-app-audio.ts";
 
@@ -518,6 +518,7 @@ function createMainWindow(): BrowserWindow {
     }
   });
 
+  void syncStartupTask();
   PushToTalk.install(page);
   ipcMain.on("configure-push-to-talk", () => {
     PushToTalk.configure();

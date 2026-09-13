@@ -1,0 +1,16 @@
+<!--
+  Extensions for the Microsoft Store package, spliced into the <Extensions> of
+  the manifest electron-builder generates. See `appx.customExtensionsPath` in
+  package.json.
+
+  The startup task is how a packaged app starts at login: the Run key the
+  installer build writes is invisible from inside a package. It is declared
+  switched off, as the setting defaults to off, and app/main/startup.ts turns it
+  on and off by its TaskId. Two files, one string.
+
+  Not electron-builder's own addAutoLaunchExtension, which declares a task named
+  "SlackStartup" and switched on.
+-->
+<desktop:Extension Category="windows.startupTask" Executable="app\Consort.exe" EntryPoint="Windows.FullTrustApplication">
+  <desktop:StartupTask TaskId="ConsortStartup" Enabled="false" DisplayName="Consort" />
+</desktop:Extension>

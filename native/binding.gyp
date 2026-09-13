@@ -90,6 +90,41 @@
           {"sources": ["src/hotkey-unsupported.cc"]}
         ]
       ]
+    },
+    # Starting at login, in the Microsoft Store build.
+    #
+    # WHY a native addon: a packaged app starts at login through a startup task
+    # declared in its manifest, switched through a WinRT API Electron does not
+    # reach. See src/startup-task-win.cc.
+    #
+    # It builds everywhere, like its neighbours, and into both Windows builds:
+    # the installer build carries it unused, since only a packaged app asks.
+    {
+      "target_name": "consort_startup",
+      "include_dirs": ["<!(node -p \"require('node-addon-api').include_dir\")"],
+      "defines": ["NAPI_VERSION=8", "NOMINMAX", "UNICODE", "_UNICODE"],
+      # Exceptions on: C++/WinRT reports every failure as one.
+      "cflags!": ["-fno-exceptions"],
+      "cflags_cc!": ["-fno-exceptions"],
+      "conditions": [
+        [
+          "OS=='win'",
+          {
+            "sources": ["src/startup-task-win.cc"],
+            # windowsapp for the WinRT runtime C++/WinRT calls into.
+            "libraries": ["-lwindowsapp.lib"],
+            # No program database, for the LNK1103 reason given above.
+            "msvs_settings": {
+              "VCCLCompilerTool": {
+                "ExceptionHandling": 1,
+                "DebugInformationFormat": "0"
+              },
+              "VCLinkerTool": {"GenerateDebugInformation": "false"}
+            }
+          },
+          {"sources": ["src/startup-task-unsupported.cc"]}
+        ]
+      ]
     }
   ]
 }

@@ -138,8 +138,15 @@
         {
           "from": "native/build/Release/consort_hotkey.node",
           "to": "native/consort_hotkey.node"
+        },
+        {
+          "from": "native/build/Release/consort_startup.node",
+          "to": "native/consort_startup.node"
         }
       ]
+    },
+    "appx": {
+      "customExtensionsPath": "packaging/appx-extensions.xml"
     },
     "appxManifestCreated": "./tools/appx-manifest.ts",
     "msi": {
