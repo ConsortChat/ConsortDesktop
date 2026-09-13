@@ -386,8 +386,12 @@ function createMainWindow(): BrowserWindow {
     }
   }
 
-  // Used for notifications on Windows
-  app.setAppUserModelId("org.zulip.zulip-electron");
+  // Used for notifications on Windows. Not in the Store build, whose ID is its
+  // package's: Windows attributes a packaged app's notifications by that, and
+  // setting any other leaves them unattributed and unshown.
+  if (!process.windowsStore) {
+    app.setAppUserModelId("org.zulip.zulip-electron");
+  }
 
   remoteMain.initialize();
 
