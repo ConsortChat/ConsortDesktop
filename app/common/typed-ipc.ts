@@ -49,7 +49,6 @@ export type MainMessage = {
   "toggle-app": () => void;
   "toggle-badge-option": (newValue: boolean) => void;
   "toggle-menubar": (showMenubar: boolean) => void;
-  toggleAutoLauncher: (AutoLaunchValue: boolean) => void;
   "unread-count": (unreadCount: number) => void;
   "update-badge": (messageCount: number) => void;
   "update-menu": (properties: MenuProperties) => void;
@@ -101,6 +100,12 @@ export type MainCall = {
       }
     | {ok: false; message: string};
   "stop-sharing-app-audio": () => void;
+  // Switching start at login on or off, settled when the switch has been made.
+  // A call rather than a message because the answer can be no: in the Store
+  // build, Windows will not turn back on a startup task somebody switched off in
+  // Task Manager, so the setting is put back to off — and the settings page has
+  // to wait for that, or it draws a switch that is on for a task that is not.
+  toggleAutoLauncher: (AutoLaunchValue: boolean) => void;
 };
 
 export type RendererMessage = {

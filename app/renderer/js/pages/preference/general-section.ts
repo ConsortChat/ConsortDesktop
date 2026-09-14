@@ -642,8 +642,13 @@ export function initGeneralSection({$root}: GeneralSectionProperties): void {
       clickHandler() {
         const newValue = !ConfigUtil.getConfigItem("startAtLogin", false);
         ConfigUtil.setConfigItem("startAtLogin", newValue);
-        ipcRenderer.send("toggleAutoLauncher", newValue);
         updateStartAtLoginOption();
+        // Drawn again once the main process is done, from the setting as it
+        // then stands: Windows may have refused, and the setting been put back.
+        void (async () => {
+          await ipcRenderer.invoke("toggleAutoLauncher", newValue);
+          updateStartAtLoginOption();
+        })();
       },
     });
   }

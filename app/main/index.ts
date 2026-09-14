@@ -938,9 +938,12 @@ function createMainWindow(): BrowserWindow {
     }
   });
 
-  ipcMain.on("toggleAutoLauncher", (_event, AutoLaunchValue: boolean) => {
-    void setAutoLaunch(AutoLaunchValue);
-  });
+  ipcMain.handle(
+    "toggleAutoLauncher",
+    async (_event, AutoLaunchValue: boolean) => {
+      await setAutoLaunch(AutoLaunchValue);
+    },
+  );
 
   ipcMain.on(
     "realm-name-changed",
