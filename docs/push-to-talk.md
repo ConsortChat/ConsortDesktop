@@ -11,7 +11,9 @@ Windows only, for now — [see below](#why-windows-only).
 
 - the switch,
 - the key, chosen by clicking the button and pressing it,
-- whether opening and shutting the gate makes a sound.
+- whether opening and shutting the gate makes a sound. It only does while
+  something has the microphone — a call, almost always — so pressing the key
+  outside one is silent.
 
 The section is not shown on Linux or macOS.
 

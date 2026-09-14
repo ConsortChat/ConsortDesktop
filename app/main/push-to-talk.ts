@@ -114,14 +114,30 @@ function tone(nowOpen: boolean): void {
   send(page, "push-to-talk-tone", nowOpen);
 }
 
+/**
+ Sound an edge, once the gate has said there is a microphone behind it.
+
+ Nothing otherwise. The tone means "the key reached your microphone", and with
+ nothing capturing — no call — there is no microphone for it to have reached:
+ every press would blip at somebody who is not talking to anyone, and a key
+ bound to something that also has another use would blip all day.
+ */
+async function toneWhenLive(
+  change: Promise<boolean>,
+  nowOpen: boolean,
+): Promise<void> {
+  if (await change) {
+    tone(nowOpen);
+  }
+}
+
 function openGate(): void {
   if (open) {
     return;
   }
 
   open = true;
-  void MicGate.setOpen(true);
-  tone(true);
+  void toneWhenLive(MicGate.setOpen(true), true);
 
   watchdog ??= setInterval(() => {
     const loaded = addon;
@@ -154,8 +170,7 @@ function closeGate(): void {
   }
 
   open = false;
-  void MicGate.setOpen(false);
-  tone(false);
+  void toneWhenLive(MicGate.setOpen(false), false);
 }
 
 /**

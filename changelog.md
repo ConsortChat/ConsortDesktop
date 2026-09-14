@@ -3,6 +3,15 @@
 All notable changes to the desktop app are documented in this file. Entries
 below the first are inherited from Zulip Desktop, which this is a fork of.
 
+### Unreleased
+
+**Fixes**:
+
+- Push to talk no longer beeps when you are not in a call. The tones confirming
+  that the microphone opened and closed played on every press of the key,
+  including while nothing was listening; they now play only while a call has
+  the microphone, which is the only time the key does anything.
+
 ### Consort v5.12.4-19 --2026-09-13
 
 **Fixes**:

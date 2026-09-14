@@ -46,7 +46,8 @@ declare global {
      every later update finds it by this property.
      */
     consortMicrophoneGate?: {
-      set: (gating: boolean, open: boolean) => void;
+      /** Returns how many microphone tracks in this frame are behind the gate. */
+      set: (gating: boolean, open: boolean) => number;
     };
   }
 }
@@ -171,6 +172,10 @@ function attachMicrophoneGate(
       for (const gate of gates) {
         apply(gate);
       }
+
+      // Answered with how many there are, which is how the main process learns
+      // whether a press of the key reached a microphone at all.
+      return gates.size;
     },
   };
 
@@ -211,6 +216,9 @@ function attachMicrophoneGate(
 let watched: Session | undefined;
 let gating = false;
 let open = false;
+// Whether the last update found a microphone behind the gate in any frame:
+// something capturing while push to talk is on, which is a call almost always.
+let live = false;
 
 function attachScript(): string {
   return `(${attachMicrophoneGate.toString()})(${JSON.stringify(
@@ -232,9 +240,9 @@ function updateScript(): string {
   )}, ${JSON.stringify(open)})`;
 }
 
-async function run(frame: WebFrameMain, script: string): Promise<void> {
+async function run(frame: WebFrameMain, script: string): Promise<unknown> {
   try {
-    await frame.executeJavaScript(script);
+    return await frame.executeJavaScript(script);
   } catch (error: unknown) {
     // A frame that navigated or died while this was in flight, most often.
     // Nothing here is worth failing a call over.
@@ -326,17 +334,26 @@ export async function setGating(nowGating: boolean): Promise<void> {
   await update();
 }
 
-/** Open or shut the gate, which is what pressing the key does. */
-export async function setOpen(nowOpen: boolean): Promise<void> {
+/**
+ Open or shut the gate, which is what pressing the key does.
+
+ Settles with whether any microphone is behind the gate, so that the caller can
+ tell a press that reached a call from one that reached nothing.
+ */
+export async function setOpen(nowOpen: boolean): Promise<boolean> {
   if (nowOpen === open) {
-    return;
+    return live;
   }
 
   open = nowOpen;
-  await update();
+  return update();
 }
 
-async function update(): Promise<void> {
+async function update(): Promise<boolean> {
   const script = updateScript();
-  await Promise.all(frames().map(async (frame) => run(frame, script)));
+  const counts = await Promise.all(
+    frames().map(async (frame) => run(frame, script)),
+  );
+  live = counts.some((count) => typeof count === "number" && count > 0);
+  return live;
 }
